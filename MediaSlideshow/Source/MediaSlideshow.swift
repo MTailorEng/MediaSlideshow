@@ -156,6 +156,15 @@ open class MediaSlideshow: UIView {
 
     // MARK: - Preferences
 
+    /// Enables/disables circular carousel
+    open var circular = false {
+        didSet {
+            if sources.count > 0 {
+                setMediaSources(sources)
+            }
+        }
+    }
+    
     /// Enables/disables user interactions
     open var draggingEnabled = true {
         didSet {
@@ -299,7 +308,12 @@ open class MediaSlideshow: UIView {
             slides.append(slide)
             scrollView.addSubview(slide)
         }
-        scrollViewPage = 0
+        if circular && (sources.count > 1) {
+            scrollViewPage = 1
+            scrollView.scrollRectToVisible(CGRect(x: scrollView.frame.size.width, y: 0, width: scrollView.frame.size.width, height: scrollView.frame.size.height), animated: false)
+        } else {
+            scrollViewPage = 0
+        }
         loadMedia(for: scrollViewPage)
         if !slides.isEmpty {
             delegate?.mediaSlideshow?(self, didChangeCurrentPageTo: 0)
@@ -332,6 +346,23 @@ open class MediaSlideshow: UIView {
     public func setMediaSources(_ sources: [MediaSource]) {
         self.sources = sources
         pageIndicator?.numberOfPages = sources.count
+        
+        if circular && sources.count > 1 {
+            var scMedias = [MediaSource]()
+            
+            if let last = sources.last {
+                scMedias.append(last)
+            }
+            scMedias += sources
+            if let first = sources.first {
+                scMedias.append(first)
+            }
+            
+            self.sources = scMedias
+        } else {
+            self.sources = sources
+        }
+        
         reloadScrollView()
         layoutScrollView()
         layoutPageControl()
@@ -345,7 +376,11 @@ open class MediaSlideshow: UIView {
      - parameter animated: true if animate the change
      */
     open func setCurrentPage(_ newPage: Int, animated: Bool) {
-        setScrollViewPage(newPage, animated: animated)
+        var pageOffset = newPage
+        if circular && (sources.count > 1) {
+            pageOffset += 1
+        }
+        setScrollViewPage(pageOffset, animated: animated)
     }
 
     /**
@@ -381,7 +416,19 @@ open class MediaSlideshow: UIView {
     }
 
     fileprivate func currentPageForScrollViewPage(_ page: Int) -> Int {
-        page
+        if circular {
+            if page == 0 {
+                // first page contains the last image
+                return Int(sources.count) - 1
+            } else if page == sources.count - 1 {
+                // last page contains the first image
+                return 0
+            } else {
+                return page - 1
+            }
+        } else {
+            return page
+        }
     }
 
     /**
@@ -389,6 +436,10 @@ open class MediaSlideshow: UIView {
      - Parameter animated: true if animate the change
      */
     open func nextPage(animated: Bool) {
+        if !circular && currentPage == sources.count - 1 {
+            return
+        }
+        
         if isAnimating {
             return
         }
@@ -400,6 +451,10 @@ open class MediaSlideshow: UIView {
      - Parameter animated: true if animate the change
      */
     open func previousPage(animated: Bool) {
+        if !circular && currentPage == 0 {
+            return
+        }
+        
         if isAnimating {
             return
         }
@@ -428,6 +483,16 @@ extension MediaSlideshow: UIScrollViewDelegate {
     }
 
     open func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        if circular && (sources.count > 1) {
+            let regularContentOffset = scrollView.frame.size.width * CGFloat(sources.count)
+            
+            if scrollView.contentOffset.x >= scrollView.frame.size.width * CGFloat(sources.count + 1) {
+                scrollView.contentOffset = CGPoint(x: scrollView.contentOffset.x - regularContentOffset, y: 0)
+            } else if scrollView.contentOffset.x <= 0 {
+                scrollView.contentOffset = CGPoint(x: scrollView.contentOffset.x + regularContentOffset, y: 0)
+            }
+        }
+        
         // Updates the page indicator as the user scrolls (#204). Not called when not dragging to prevent flickers
         // when interacting with PageControl directly (#376).
         if scrollView.isDragging {
