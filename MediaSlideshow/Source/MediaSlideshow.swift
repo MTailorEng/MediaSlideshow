@@ -198,6 +198,17 @@ open class MediaSlideshow: UIView {
         }
     }
 
+    /// Corner radius for all slides in the slideshow
+    open var cornerRadius: CGFloat = 0 {
+        didSet {
+            for view in slides {
+                if let imageSlide = view as? ImageSlide {
+                    imageSlide.cornerRadius = cornerRadius
+                }
+            }
+        }
+    }
+
     fileprivate var isAnimating: Bool = false
 
     /// Transitioning delegate to manage the transition to full screen controller
@@ -305,6 +316,9 @@ open class MediaSlideshow: UIView {
         slides = []
         for source in sources {
             let slide = source.slide(in: self)
+            if let imageSlide = slide as? ImageSlide {
+                imageSlide.cornerRadius = cornerRadius
+            }
             slides.append(slide)
             scrollView.addSubview(slide)
         }

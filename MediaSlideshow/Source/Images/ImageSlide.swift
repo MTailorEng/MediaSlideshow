@@ -32,6 +32,14 @@ open class ImageSlide: UIScrollView, UIScrollViewDelegate, ZoomableMediaSlidesho
     /// Maximum zoom scale
     open var maximumScale: CGFloat = 2.0
 
+    /// Corner radius for the image view
+    open var cornerRadius: CGFloat = 0 {
+        didSet {
+            imageView.layer.cornerRadius = cornerRadius
+            imageView.layer.masksToBounds = true
+        }
+    }
+
     open var mediaContentMode: UIView.ContentMode {
         get { imageView.contentMode }
         set { imageView.contentMode = newValue }
