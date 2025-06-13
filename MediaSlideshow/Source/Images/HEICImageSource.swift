@@ -25,9 +25,21 @@ open class HEICImageSource: NSObject, ImageSource {
     }
     
     public func load(to imageView: UIImageView, with callback: @escaping (UIImage?) -> Void) {
-        if let path = path, let image = loadHEICImage(from: path) {
-            imageView.image = image
-            callback(image)
+        if let path = path {
+            if let image = loadHEICImage(from: path) {
+                imageView.image = image
+                callback(image)
+            } else {
+                callback(nil)
+            }
+        } else if let imageName = imageName,
+                  let assetPath = Bundle.main.path(forResource: imageName, ofType: "heic", inDirectory: nil) {
+            if let image = loadHEICImage(from: assetPath) {
+                imageView.image = image
+                callback(image)
+            } else {
+                callback(nil)
+            }
         } else {
             callback(nil)
         }
