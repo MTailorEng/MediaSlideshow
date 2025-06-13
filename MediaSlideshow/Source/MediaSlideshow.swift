@@ -204,6 +204,8 @@ open class MediaSlideshow: UIView {
             for view in slides {
                 if let imageSlide = view as? ImageSlide {
                     imageSlide.cornerRadius = cornerRadius
+                } else if let avSlide = view as? AVPlayerSlide {
+                    avSlide.cornerRadius = cornerRadius
                 }
             }
         }
@@ -318,6 +320,8 @@ open class MediaSlideshow: UIView {
             let slide = source.slide(in: self)
             if let imageSlide = slide as? ImageSlide {
                 imageSlide.cornerRadius = cornerRadius
+            } else if let avSlide = slide as? AVPlayerSlide {
+                avSlide.cornerRadius = cornerRadius
             }
             slides.append(slide)
             scrollView.addSubview(slide)

@@ -18,6 +18,15 @@ public protocol AVPlayerSlideDelegate: AnyObject {
 public class AVPlayerSlide: UIView, MediaSlideshowSlide {
     weak var delegate: AVPlayerSlideDelegate?
 
+    public var cornerRadius: CGFloat = 0 {
+        didSet {
+            playerController.view.layer.cornerRadius = cornerRadius
+            playerController.view.layer.masksToBounds = true
+            self.layer.cornerRadius = cornerRadius
+            self.layer.masksToBounds = true
+        }
+    }
+
     public let playerController: AVPlayerViewController
     private let transitionView: UIImageView
 
@@ -36,6 +45,8 @@ public class AVPlayerSlide: UIView, MediaSlideshowSlide {
         if playerController.showsPlaybackControls {
             addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(didSingleTap)))
         }
+        self.backgroundColor = .clear
+        playerController.view.backgroundColor = .clear
     }
 
     required public init?(coder aDecoder: NSCoder) {
