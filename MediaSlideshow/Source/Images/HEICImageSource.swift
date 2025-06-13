@@ -16,12 +16,11 @@ open class HEICImageSource: NSObject, ImageSource {
     
     /// Initializes a new source with an image name from the main bundle
     /// - parameter imageName: name of the HEIC file in the application's main bundle
-    public init?(imageName: String) {
-        guard let path = Bundle.main.path(forResource: imageName, ofType: "heic") else {
-            return nil
-        }
-        self.path = path
+    public init(imageName: String) {
         self.imageName = imageName
+        if let path = Bundle.main.path(forResource: imageName, ofType: "heic") {
+            self.path = path
+        }
         super.init()
     }
     
