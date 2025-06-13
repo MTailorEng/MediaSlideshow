@@ -24,7 +24,26 @@ public class AVPlayerSlide: UIView, MediaSlideshowSlide {
             playerController.view.layer.masksToBounds = true
             self.layer.cornerRadius = cornerRadius
             self.layer.masksToBounds = true
+            
+            // Find and update AVPlayerLayer
+            if let playerLayer = findAVPlayerLayer(in: playerController.view.layer) {
+                playerLayer.cornerRadius = cornerRadius
+                playerLayer.masksToBounds = true
+            }
         }
+    }
+    
+    // Helper to recursively find AVPlayerLayer
+    private func findAVPlayerLayer(in layer: CALayer) -> AVPlayerLayer? {
+        if let avLayer = layer as? AVPlayerLayer {
+            return avLayer
+        }
+        for sublayer in layer.sublayers ?? [] {
+            if let found = findAVPlayerLayer(in: sublayer) {
+                return found
+            }
+        }
+        return nil
     }
 
     public let playerController: AVPlayerViewController
